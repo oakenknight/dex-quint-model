@@ -265,6 +265,9 @@ module utils {
                         val tranche = tranches.get(minTrancheKey)
                         val exchangeInfo = calculateTrancheExchangableAmount(acc.remainingAmountToExchange, tranche)
                         // update the acc value
+                        if (exchangeInfo.exchangedTakerAmount == 0)
+                            acc
+                        else
                         {
                             ...acc,
                             tranchesUpdates: acc.tranchesUpdates.put(

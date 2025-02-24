@@ -26,7 +26,7 @@ module runs {
             val res = deposit(state, msg)
             all{
                 state' = res.state,
-                assert(res.state.poolShares.get("Bob").get(poolKey) == 6150),
+                assert(res.state.poolShares.get(("Bob", poolKey)) == 6150),
                 assert(res.state.pools.get(poolKey).reserves == (0, 6071))
             }
         )
@@ -87,8 +87,8 @@ module runs {
                 assert(res.error == "nil"),
                 // the swap didn't reach the tranche
                 assert(tranche.isFresh),
-                assert(pool.reserves == (6, 50)),
-                assert(res.state.coins.get(("Carol", "A")) == 10004 and res.state.coins.get(("Carol", "B")) == 9950),
+                assert(pool.reserves == (6, 41)),
+                assert(res.state.coins.get(("Carol", "A")) == 10004 and res.state.coins.get(("Carol", "B")) == 9959),
                 state' = res.state,
             }
         )
@@ -106,8 +106,9 @@ module runs {
                 state' = res.state,
                 assert(res.error == "nil"),
                 assert(not(tranche.isFresh)),
-                assert(pool.reserves == (0, 110)),
-                assert(res.state.coins.get(("Carol", "A")) == 10024 and res.state.coins.get(("Carol", "B")) == 9750),
+                assert(tranche.reservesMaker == 87),
+                assert(pool.reserves == (0, 102)),
+                assert(res.state.coins.get(("Carol", "A")) == 10023 and res.state.coins.get(("Carol", "B")) == 9767),
             }
         )
 
@@ -229,8 +230,8 @@ module runs {
                 val trancheKey = { id: 1, makerToken: "A", takerToken: "B", sellTick: 19460 }
                 val updatedTranche = updatedState.tranches.get(trancheKey)
                 all{
-                    assert(updatedTranche.reservesMaker == 7),
-                    assert(updatedTranche.reservesTaker == 20),
+                    assert(updatedTranche.reservesMaker == 8),
+                    assert(updatedTranche.reservesTaker == 14),
                 }
             }
         )
@@ -251,7 +252,7 @@ module runs {
                 val newTrancheKey = { id: 2, makerToken: "B", takerToken: "A", sellTick: -20000 }
                 val newTranche = updatedState.tranches.get(newTrancheKey)
                 all{
-                    assert(newTranche.reservesMaker == 19952),
+                    assert(newTranche.reservesMaker == 19950),
                     assert(newTranche.reservesTaker == 0),
                     assert(newTranche.makerDenomination == "B")
                 }

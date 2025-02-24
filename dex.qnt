@@ -67,7 +67,7 @@ module Dex {
         val pool = state.pools.getOrElse(poolId, emptyPool)
 
         // This is to disallow a known property violation, as otherwise that one gets found all the time
-        if (pool != emptyPool and not(isRatioReasonable(pool.reserves, depositAmounts))) { state: state, error: "Ratio condition not satisfied" } else
+        if (EXCLUDE_KNOWN_BUGS and pool != emptyPool and not(isRatioReasonable(pool.reserves, amounts))) { state: state, error: "Ratio condition not satisfied" } else
 
         val inAmountsBeforeAutoswap = computeAmountsDeposit(pool.reserves, depositAmounts)
         // the amounts that need to be swapped
