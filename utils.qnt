@@ -655,24 +655,25 @@ module utils {
         amount0: int,
         amount1: int
     ): {inAmount0: int, inAmount1: int, depositAmount0: int, depositAmount1: int, error: str} =
-        val depositTickToken0 = -tickIndex + fee
-        
+        val depositTickToken0 = -tickIndex + fee //@audit-issue this tick is fine, but using it in swap functions is not
+        val depositTickToken1 = tickIndex + fee
+
         // TODO: this is unnecarily computationally intensive. But it does allow us to ensure that both sides can 
         // never be behind enemy lines. 
-        val swapResult0To1 =  swap(
+        val swapResult0To1: SwapUpdateInfo =  swap(
                 (tokenPair._1, tokenPair._2),
                 tranches,
                 pools,
                 amount0,
-                -depositTickToken0,
+                depositTickToken0,
                 0
             )
-        val swapResult1To0 =  swap(
+        val swapResult1To0: SwapUpdateInfo =  swap(
                 (tokenPair._2, tokenPair._1),
                 tranches,
                 pools,
                 amount1,
-                depositTickToken0,
+                depositTickToken1,
                 0
         )
 

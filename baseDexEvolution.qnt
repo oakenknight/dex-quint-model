@@ -14,7 +14,7 @@ module baseDexEvolution {
 
     // STATE MACHINE
     action init = {
-        state' = initState,
+        state' = initState
     }
 
     action step: bool = any {
@@ -63,7 +63,9 @@ module baseDexEvolution {
 
     action depositAction(processResult: (Result, Message) => bool): bool =
         nondet doAutoswap = oneOf(Set(true, false))
-        nondet doSwapOnDeposit = oneOf(Set(true, false))
+        //@audit-issue if autoswap is turned ON, then and only then is possible to do SwapOnDeposit, so we can simplify it
+        //nondet doSwapOnDeposit = oneOf(Set(true, false))
+        val doSwapOnDeposit = doAutoswap
         // Build a set of (Addr, PoolId) tuples containing all the pools whose tokens are
         // the ones of which the creator has >0 coins.
         // (Otherwise, the creator cannot deposit since it has no coins to deposit)
@@ -75,7 +77,7 @@ module baseDexEvolution {
         val tokenPair = creatorAndPair._2
         nondet fee = oneOf(FEES)
         nondet tick = oneOf(TICKS)
-        nondet amountTokenX = oneOf(0.to(state.coins.get((creator, tokenPair._1))))
+        nondet amountTokenX = oneOf(0.to(debug("state.coins", state.coins).get((creator, tokenPair._1))))
         nondet amountTokenY = oneOf(0.to(state.coins.get((creator, tokenPair._2))))
         // we want to let simulation more often go with single-sided deposits (because they are more common, and more likely not to
         // fail due to being behind enemy lines (BEL)
@@ -218,6 +220,7 @@ module baseDexEvolution {
     val nonNegativeSharesSupply =
         state.pools.values().forall(pool => pool.shares >= 0)
 
+    // @audit-issue one of invariants broken with new changes
     // Invariant: coin and share balances are zero or greater
     val nonNegativeBalances =
         and {
@@ -326,6 +329,7 @@ module baseDexEvolution {
 
     val allInvariants = all {
         nonNegativeSharesSupply.reportIfFalse("nonNegativeSharesSupply"),
+        // @audit-issue this fails
         nonNegativeBalances.reportIfFalse("nonNegativeBalances"),
         expirationTimeSanity.reportIfFalse("expirationTimeSanity"),
         totalMakerInvariant.reportIfFalse("totalMakerInvariant"),

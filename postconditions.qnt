@@ -37,7 +37,7 @@ module postconditions {
           sharesAfter == sharesBefore - msg.sharesAmount,
        }
 
-
+   //@audit-issue deposit state changes have to take into account changes in case of SwapOnDeposit.
     pure def depositStateChanges(before: State, after: State, msg: DepositMsg): bool =
        // We could guarantee by design that the token pair is submitted in order
        val pair = orderTokenPair(msg.tokenPair)
@@ -334,6 +334,7 @@ module postconditions {
     }
 
     /// LP.3: Swapping through a pool can only increase the total value of the pool (assuming token price is the tick price)
+    //@audit-issue pool values have to take into account changes in case of SwapOnDeposit.
     pure def poolValueIncreased(before: State, after: State, msg: DepositMsg): bool = {
        val pair = orderTokenPair(msg.tokenPair)
        val amounts = if (pair == msg.tokenPair) msg.amountPair else (msg.amountPair._2, msg.amountPair._1)
@@ -369,6 +370,7 @@ module postconditions {
     pure def postconditionForMessage(before: State, after: State, message: Message): bool = {
         match message {
             | DepositPool(msg) => and {
+               //@audit-issue postconditions have to be changed, that should be done here
                 depositStateChanges(before, after, msg).reportIfFalse("depositStateChanges postcondition"),
                 poolValueIncreased(before, after, msg).reportIfFalse("poolValueIncreased postcondition"),
             }
