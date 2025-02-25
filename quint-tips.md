@@ -79,7 +79,7 @@ Proposed fix:
 
 ```scala
         nondet doAutoswap = oneOf(Set(true, false))
-        val doSwapOnDeposit = doAutoswap
+        val doSwapOnDeposit = if(doAutoswap) oneOf(Set(true, false)) else false
 ```
 
 ### `swap` function returns values which are not used to update states later
